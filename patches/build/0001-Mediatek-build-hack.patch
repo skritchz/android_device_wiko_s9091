@@ -1,47 +1,92 @@
-From 57452b0e88731d3afe22fe3170f5f64d22ccf3d5 Mon Sep 17 00:00:00 2001
+From aab2d73f6bdffc1ea794eb23b3a62bc5be955a5d Mon Sep 17 00:00:00 2001
 From: Legrand Benjamin <android@legrand.ws>
-Date: Fri, 29 Mar 2013 17:25:25 +0100
-Subject: [PATCH] [Mediatek build hack]
+Date: Wed, 3 Apr 2013 21:37:27 +0200
+Subject: [PATCH] Add define to use custom kernel build script
 
-Add some parameters to the kernel make command so that we can use the Mediatek specific kernel build system
-
-Change-Id: I43ca39617585683efdf0934d806312be7675fa2c
+Change-Id: I38d30521086e12ff5b38f1e47b88344d471a8ecd
 ---
- core/tasks/kernel.mk | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ core/combo/arch/arm/armv7-a-neon.mk |  9 ++++++++-
+ core/tasks/kernel.mk                | 26 +++++++++++++++++++-------
+ 2 files changed, 27 insertions(+), 8 deletions(-)
 
+diff --git a/core/combo/arch/arm/armv7-a-neon.mk b/core/combo/arch/arm/armv7-a-neon.mk
+index 7b5b8ed..1b8181a 100644
+--- a/core/combo/arch/arm/armv7-a-neon.mk
++++ b/core/combo/arch/arm/armv7-a-neon.mk
+@@ -11,6 +11,11 @@ ARCH_ARM_HAVE_ARMV7A            := true
+ ARCH_ARM_HAVE_VFP               := true
+ ARCH_ARM_HAVE_VFP_D32           := true
+ ARCH_ARM_HAVE_NEON              := true
++#wschen
++ARCH_ARM_HAVE_TLS_REGISTER      := true
++ARCH_ARM_NEON_SUPPORTS_UNALIGNED_ACCESS := true
++ARCH_ARM_MEMCPY_ALIGNMENT_DIVIDER := 64
++ARCH_ARM_MEMSET_NEON_DIVIDER := 64
+ 
+ # Note: Hard coding the 'tune' value here is probably not ideal,
+ # and a better solution should be found in the future.
+@@ -18,7 +23,9 @@ ARCH_ARM_HAVE_NEON              := true
+ arch_variant_cflags := \
+     -march=armv7-a \
+     -mfloat-abi=softfp \
+-    -mfpu=neon
++    -mfpu=neon \
++    -ftree-vectorize \
++    -mtune=cortex-a9
+ 
+ arch_variant_ldflags := \
+ 	-Wl,--fix-cortex-a8
 diff --git a/core/tasks/kernel.mk b/core/tasks/kernel.mk
-index 7b68726..853fdde 100644
+index 81a1916..00e5a64 100644
 --- a/core/tasks/kernel.mk
 +++ b/core/tasks/kernel.mk
-@@ -151,16 +151,24 @@ $(KERNEL_OUT):
+@@ -65,12 +65,20 @@ ifeq "$(wildcard $(KERNEL_SRC) )" ""
+ else
+     NEEDS_KERNEL_COPY := true
+     ifeq ($(TARGET_KERNEL_CONFIG),)
+-        $(warning **********************************************************)
+-        $(warning * Kernel source found, but no configuration was defined  *)
+-        $(warning * Please add the TARGET_KERNEL_CONFIG variable to your   *)
+-        $(warning * BoardConfig.mk file                                    *)
+-        $(warning **********************************************************)
+-        # $(error "NO KERNEL CONFIG")
++        ifeq ($(TARGET_KERNEL_PROVIDES_BUILD_COMMANDS),)
++            $(warning **********************************************************)
++            $(warning * Kernel source found, but no configuration was defined  *)
++            $(warning * Please add the TARGET_KERNEL_CONFIG variable to your   *)
++            $(warning * BoardConfig.mk file                                    *)
++            $(warning **********************************************************)
++            # $(error "NO KERNEL CONFIG")
++        else
++            $(warning **********************************************************)
++            $(warning * Kernel source found, but no configuration was defined  *)
++            $(warning * You have provided your own way of building the kernel  *)
++            $(warning * Ensure this is what you expected                       *)
++            $(warning **********************************************************)
++        endif
+     else
+         #$(info Kernel source found, building it)
+         FULL_KERNEL_BUILD := true
+@@ -127,6 +135,8 @@ $(KERNEL_OUT):
  	mkdir -p $(KERNEL_OUT)
  	mkdir -p $(KERNEL_MODULES_OUT)
  
-+ifeq $($(KERNEL_MAKE_PARAMETERS),)
-+    MAKE_ADDITIONAL_PARAMETERS := 
-+else
-+    MAKE_ADDITIONAL_PARAMETERS := $(KERNEL_MAKE_PARAMETERS)
-+endif
-+
++ifeq ($(TARGET_KERNEL_PROVIDES_BUILD_COMMANDS),)
 +
  $(KERNEL_CONFIG): $(KERNEL_OUT)
  	$(MAKE) -C $(KERNEL_SRC) O=$(KERNEL_OUT) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) $(KERNEL_DEFCONFIG)
  
- $(KERNEL_OUT)/piggy : $(TARGET_PREBUILT_INT_KERNEL)
- 	$(hide) gunzip -c $(KERNEL_OUT)/arch/$(TARGET_ARCH)/boot/compressed/piggy.gzip > $(KERNEL_OUT)/piggy
+@@ -148,7 +158,9 @@ $(TARGET_PREBUILT_INT_KERNEL): $(TARGET_KERNEL_MODULES)
  
-+
- TARGET_KERNEL_BINARIES: $(KERNEL_OUT) $(KERNEL_CONFIG) $(KERNEL_HEADERS_INSTALL)
--	$(MAKE) -C $(KERNEL_SRC) O=$(KERNEL_OUT) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) $(TARGET_PREBUILT_INT_KERNEL_TYPE)
--	$(MAKE) -C $(KERNEL_SRC) O=$(KERNEL_OUT) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) modules
--	$(MAKE) -C $(KERNEL_SRC) O=$(KERNEL_OUT) INSTALL_MOD_PATH=../../$(KERNEL_MODULES_INSTALL) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) modules_install
-+	$(MAKE) $(MAKE_ADDITIONAL_PARAMETERS) -C $(KERNEL_SRC) O=$(KERNEL_OUT) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) $(TARGET_PREBUILT_INT_KERNEL_TYPE)
-+	$(MAKE) $(MAKE_ADDITIONAL_PARAMETERS) -C $(KERNEL_SRC) O=$(KERNEL_OUT) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) modules
-+	$(MAKE) $(MAKE_ADDITIONAL_PARAMETERS) -C $(KERNEL_SRC) O=$(KERNEL_OUT) INSTALL_MOD_PATH=../../$(KERNEL_MODULES_INSTALL) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) modules_install
- 	$(mv-modules)
- 	$(clean-module-folder)
+ $(KERNEL_HEADERS_INSTALL): $(KERNEL_OUT) $(KERNEL_CONFIG)
+ 	$(MAKE) -C $(KERNEL_SRC) O=$(KERNEL_OUT) ARCH=$(TARGET_ARCH) $(ARM_CROSS_COMPILE) headers_install
+-
++else
++-include $(TARGET_KERNEL_PROVIDES_BUILD_COMMANDS)
++endif # TARGET_KERNEL_PROVIDES_BUILD_COMMANDS
+ endif # FULL_KERNEL_BUILD
  
+ ## Install it
 -- 
 1.8.1.2
 
