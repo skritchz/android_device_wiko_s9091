@@ -26,10 +26,12 @@ PREBUILT_FOLDER := device/wiko/s9091/prebuilt
 
 #We should use the current kernel until we can provide some more information when build
 #TARGET_PREBUILT_KERNEL := $(PREBUILT_FOLDER)/kernel
-TARGET_KERNEL_SOURCE := kernel/wiko/s9091/
-TARGET_KERNEL_CONFIG := wiko_s9091_config
-TARGET_KERNEL_CUSTOM_TOOLCHAIN := arm-eabi-4.4.3
-TARGET_KERNEL_PROVIDES_BUILD_COMMANDS := kernel/wiko/s9091/Android.mk
+TARGET_KERNEL_SOURCE := kernel/wiko/s9091/kernel
+TARGET_KERNEL_CONFIG := mediatek-configs
+TARGET_KERNEL_CUSTOM_TOOLCHAIN := arm-linux-androideabi-4.4.x
+TARGET_KERNEL_CUSTOM_TOOLCHAIN_BIN := arm-linux-androideabi-
+TARGET_KERNEL_PROVIDES_BUILD_COMMANDS := kernel/wiko/s9091/s9091.mk
+NEEDS_KERNEL_COPY := true
 
 KERNEL_MAKE_PARAMETERS := TARGET_PRODUCT=tinno77_ics2 MTK_ROOT_CUSTOM=$(TARGET_KERNEL_SOURCE)/mediatek/custom 
 
