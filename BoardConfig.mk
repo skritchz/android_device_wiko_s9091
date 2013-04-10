@@ -21,7 +21,9 @@ USE_CAMERA_STUB := true
 -include vendor/wiko/s9091/BoardConfigVendor.mk
 
 
-PREBUILT_FOLDER := device/wiko/s9091/prebuilt
+LOCAL_FOLDER := device/wiko/s9091
+
+PREBUILT_FOLDER := $(LOCAL_FOLDER)/prebuilt
 
 
 #We should use the current kernel until we can provide some more information when build
@@ -35,7 +37,7 @@ NEEDS_KERNEL_COPY := true
 
 KERNEL_MAKE_PARAMETERS := TARGET_PRODUCT=tinno77_ics2 MTK_ROOT_CUSTOM=$(TARGET_KERNEL_SOURCE)/mediatek/custom 
 
-TARGET_SPECIFIC_HEADER_PATH := device/wiko/s9091/include
+TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_FOLDER)/include
 
 TARGET_BOARD_PLATFORM := mt6577
 
@@ -67,7 +69,7 @@ TARGET_GLOBAL_CFLAGS   += -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
 
 
-BOARD_CONFIG_DIR := device/wiko/s9091/config
+BOARD_CONFIG_DIR := $(LOCAL_FOLDER)/config
 #Graphics
 BOARD_EGL_CFG := $(BOARD_CONFIG_DIR)/egl.cfg
 
@@ -81,7 +83,6 @@ BOARD_DISABLE_FMRADIO_TRANSMITTER_TEST := true
 
 ### TODO AND TO CHECK
 BOARD_KERNEL_CMDLINE := 
-BOARD_KERNEL_BASE := 0x10000000
 # Checked in sysinfo
 BOARD_KERNEL_PAGESIZE := 4096
 
@@ -101,6 +102,11 @@ BOARD_CACHEIMAGE_PARTITION_SIZE:=523239424
 #1038*1024*1024
 BOARD_USERDATAIMAGE_PARTITION_SIZE:=1088421888
 BOARD_FATIMAGE_PARTITION_SIZE:=0
+
+
+BOARD_CUSTOM_BOOTIMG_MK := $(LOCAL_FOLDER)/custom_bootimg.mk
+
+
 
 #TODO CHECK
 TARGET_USE_SCORPION_BIONIC_OPTIMIZATION := true

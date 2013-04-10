@@ -1,0 +1,7 @@
+#!/bin/bash
+current_directory=`pwd`
+cd $1
+echo "find . | cpio -o -H newc | gzip > $2" 
+find . | cpio -o -H newc | gzip > ../temp_cpio_gz
+cd $current_directory
+mv $1/../temp_cpio_gz $2
