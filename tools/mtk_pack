@@ -1,6 +1,8 @@
 #!/usr/bin/python
 """
-Thanks to for the perl exemple
+Thanks to https://github.com/bgcngm/mtk-tools for the perl exemple
+We also need the mkbootimg provided by mediatek which adds a KERNEL 
+flag in the generated .img file
 """
 
 import sys
