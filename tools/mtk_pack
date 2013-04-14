@@ -3,6 +3,11 @@
 Thanks to https://github.com/bgcngm/mtk-tools for the perl exemple
 We also need the mkbootimg provided by mediatek which adds a KERNEL 
 flag in the generated .img file
+
+
+Changelog:
+    * Build ramdisk for recovery
+    * Add ramdisk for rootfs
 """
 
 import sys
@@ -12,23 +17,37 @@ import subprocess
 import shlex
 
 pack_type = sys.argv[1]
-recovery_folder = sys.argv[2]
-temp_out_folder = sys.argv[3]
-#skip 4 it's the -o
-destination_file = sys.argv[5]
-temp_recovery_cpio_gz = os.path.join(temp_out_folder, "temp-ramdisk.cpio.gz")
 
+if sys.argv[1] == "--recovery":
+    recovery_folder = sys.argv[2]
+    temp_out_folder = sys.argv[3]
+    #skip 4 it's the -o
+    destination_file = sys.argv[5]
+    temp_recovery_cpio_gz = os.path.join(temp_out_folder, "temp-ramdisk.cpio.gz")
+    
+    #This should be changed to some subprocess.PIPE 
+    command_line = "device/wiko/s9091/tools/ramdisk_cpio %s %s" % (recovery_folder, temp_recovery_cpio_gz)
+    args = shlex.split(command_line)
+    
+    subprocess.call(args)
+    
+    with open(temp_recovery_cpio_gz, "rb") as f:
+        ramdisk = "".join(f.readlines())
+    
+    tag = "RECOVERY"
+elif sys.argv[1] == "--rootfs":
+    
+    ramdisk_file = sys.argv[2]
+    #skip -o
+    destination_file = sys.argv[4]
+    tag = "ROOTFS"
+    with open(ramdisk_file) as f:
+        ramdisk = "".join(f.readlines())
+else:
+    print("Unknown option %s" % sys.argv[1])
+    exit(1)
 
-#This should be changed to some subprocess.PIPE 
-command_line = "device/wiko/s9091/tools/ramdisk_cpio %s %s" % (recovery_folder, temp_recovery_cpio_gz)
-args = shlex.split(command_line)
-
-subprocess.call(args)
-
-with open(temp_recovery_cpio_gz, "rb") as f:
-    ramdisk = "".join(f.readlines())
-
-string = struct.pack("4s I 32s 472s", "\x88\x16\x88\x58", len(ramdisk), "RECOVERY", "\xFF"*472)
+string = struct.pack("4s I 32s 472s", "\x88\x16\x88\x58", len(ramdisk), tag, "\xFF"*472)
 string += ramdisk
 with open(destination_file, "wb") as f:
     f.write(string)

@@ -1,0 +1,31 @@
+/dev/xLog                 0644   root       root
+/dev/log/ksystem          0660   root       log
+
+/dev/otp            0660    root        nvram
+/dev/nvram          0660    root        system
+/mtd@nvram          0660    root        system
+/dev/misc           0660    root        system
+/mtd@misc           0660    root        system
+
+/dev/block/mmcblk0      0660    root        system
+/proc/driver/nand       0664    root        system
+
+# SGX device node
+/dev/pvrsrvkm             0666   root       root
+
+#NFC device 
+/dev/nfcc                 0600  root    root
+/dev/pn544                0666  root    root
+
+
+/sys/devices/platform/leds-mt65xx/leds/green    delay_on      0664  system   system
+/sys/devices/platform/leds-mt65xx/leds/green    delay_off     0664  system   system
+/sys/devices/platform/leds-mt65xx/leds/red      delay_on      0664  system   system
+/sys/devices/platform/leds-mt65xx/leds/red      delay_off     0664  system   system
+/sys/devices/platform/leds-mt65xx/leds/blue     delay_on      0664  system   system
+/sys/devices/platform/leds-mt65xx/leds/blue     delay_off     0664  system   system
+
+#FOR VIA MODEM
+/dev/ttyUSB*    0660    radio   log
+/dev/ttyRB*     0660    radio   radio
+/dev/ttyUSB3    0666    root    root
