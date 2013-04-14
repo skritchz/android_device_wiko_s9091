@@ -2,7 +2,7 @@
 TARGET_SCREEN_HEIGHT := 960
 TARGET_SCREEN_WIDTH := 540
 
-$(call inherit-product, device/wiko/s9091/s9091.mk)
+$(call inherit-product, device/wiko/s9091/device_s9091.mk)
 
 # Inherit some common CM stuff.
 $(call inherit-product, vendor/cm/config/common_mini_phone.mk)
