@@ -5,14 +5,21 @@ $(call inherit-product-if-exists, vendor/wiko/s9091/s9091-vendor.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/wiko/s9091/overlay
 
+PRODUCT_NAME := full_s9091
+PRODUCT_DEVICE := s9091
+
 PRODUCT_AAPT_CONFIG := normal hdpi mdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
 $(call inherit-product, build/target/product/full.mk)
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
-PRODUCT_NAME := full_s9091
-PRODUCT_DEVICE := s9091
+
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    ro.secure=0 \
+    persist.mtk.aee.aed=on \
+    persist.sys.usb.config=mass_storage,adb \
+    persist.service.acm.enable=0
 
 #Permissions dump from device
 PRODUCT_COPY_FILES += \
@@ -49,7 +56,7 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_COPY_FILES += \
     device/wiko/s9091/prebuilt/root/init.s9091.rc:root/init.s9091.rc \
-    device/wiko/s9091/prebuilt/root/init.s9091.usb.rc:root/init.s9091.usb.rc \
+    device/wiko/s9091/prebuilt/root/init.usb.s9091.rc:root/init.usb.s9091.rc \
     device/wiko/s9091/prebuilt/root/ueventd.s9091.rc:root/ueventd.s9091.rc \
     device/wiko/s9091/prebuilt/system/etc/vold.fstab:system/etc/vold.fstab \
     device/wiko/s9091/prebuilt/system/usr/keylayout/s9091_keypad.kl:/system/usr/keylayout/s9091_keypad.kl\
